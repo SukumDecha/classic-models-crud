@@ -1,0 +1,41 @@
+<div th:fragment="productList(productlines)"
+     class="relative overflow-x-auto shadow-md sm:rounded-lg w-full relative">
+
+    <div th:if="${productlines.isEmpty()}">
+        <div th:replace="~{shared/not-found}"></div>
+    </div>
+
+    <table th:if="${!productlines.isEmpty()}" class="table-auto text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+            <th scope="col" class="px-6 py-3">
+                Product line
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Description
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Total Products
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Action
+            </th>
+        </tr>
+        </thead>
+        <tbody th:each="pl : ${productlines}">
+        <tr class="odd:bg-white odd:dark:bg-gray-900 border-b dark:border-gray-700 p-4">
+            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                th:text="${pl.productLine}">
+                ></th>
+            <td class="px-6 py-4" th:text="${pl.textDescription}"></td>
+            <td class="px-6 py-4" th:text="${pl.products.size()}"></td>
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <a class="text-cyan-500" th:href="@{'/productlines/edit?productLine=' + ${pl.productLine}}">Update</a>
+                    <a class="text-red-500" th:href="@{'/productlines/delete?productLine=' + ${pl.productLine}}">Delete</a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
