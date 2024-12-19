@@ -1,6 +1,9 @@
 package sit.int202.crud.services;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,7 +18,6 @@ import java.util.List;
 public class ProductLineService {
 
     private final ProductLineRepository repository;
-    private final ProductService productService;
 
     public Productline findById(String id) {
         return repository.findById(id).orElse(null);
@@ -25,26 +27,31 @@ public class ProductLineService {
         return repository.findAll();
     }
 
-    public List<Productline> findByQuery(String query) {
-        return repository.findByQuery(query).orElseThrow(null);
+    public Page<Productline> findByQuery(String query, int page , int size ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        if(query.isEmpty()) {
+            return repository.findAll(pageable);
+        }
+
+        return repository.findByQuery(query, pageable);
     }
 
     public Productline createProductline(Productline productline) {
         return repository.save(productline);
     }
-
     public void removeProductLine(String id) {
         Productline pl = findById(id);
 
         if(pl == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The product line with this id doesn't existed: " + id);
 
-        List<Product> productList = pl.getProducts().stream().toList();
-
-        productList.forEach((p) -> {
-            p.setProductLine(null);
-
-            productService.updateProduct(p.getProductCode(), p);
-        });
+//        List<Product> productList = pl.getProducts().stream().toList();
+//
+//        productList.forEach((p) -> {
+//            p.setProductLine(null);
+//
+//            productService.updateProduct(p.getProductCode(), p);
+//        });
 
         repository.deleteById(id);
     }

@@ -1,6 +1,12 @@
 package sit.int202.crud.controllers;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import sit.int202.crud.entities.Productline;
 import sit.int202.crud.services.ProductLineService;
 
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -18,34 +25,20 @@ public class ProductLineController {
 
     private ProductLineService service;
 
-    public Model buildView(Model model, Productline productline, boolean editMode) {
-        List<Productline> productlineList = service.findAll();
-        model.addAttribute("productlines", productlineList);
+    @GetMapping({"", "/"})
+    public String view(@RequestParam(defaultValue = "1") int page,
+                       @RequestParam(defaultValue = "5") int pageSize,
+                       @RequestParam(defaultValue = "") String query,
+                       Model model) {
+        Page<Productline> productlineList = service.findByQuery(query,  page - 1, pageSize); // Spring Data starts at page 0
 
-        model.addAttribute("productLine", productline);
-        model.addAttribute("editMode", editMode);
-        return model;
-    }
-
-    public Model buildView(Model model, List<Productline> productlineList) {
         model.addAttribute("productlines", productlineList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productlineList.getTotalPages());
+        model.addAttribute("pageSize", pageSize);
 
         model.addAttribute("productLine", null);
         model.addAttribute("editMode", false);
-        return model;
-    }
-
-    @GetMapping({ "", "/"})
-    public String view(Model model) {
-        buildView(model, null, false);
-
-        return "productlines/get";
-    }
-
-    @GetMapping("/search")
-    public String view(@RequestParam("query") String query, Model model) {
-        List<Productline> productlineList = service.findByQuery(query);
-        buildView(model, productlineList);
 
         return "productlines/get";
     }
@@ -54,34 +47,56 @@ public class ProductLineController {
     public String createProductLineGet(Model model) {
         Productline productline = new Productline();
 
-        buildView(model, productline, false);
+        Page<Productline> productlineList = service.findByQuery("",  0, 5);
+
+        model.addAttribute("productlines", productlineList);
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("totalPages", productlineList.getTotalPages());
+        model.addAttribute("pageSize", 5);
+
+        model.addAttribute("productLine", productline);
+        model.addAttribute("editMode", false);
+
         return "productlines/get";
     }
 
     @PostMapping("/create")
-    public String createProductLinePost(Productline pl, Model model) {
+    public void createProductLinePost(Productline pl,HttpServletResponse response) throws IOException {
         try {
             service.createProductline(pl);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
 
-        return view(model);
+        response.sendRedirect("/productlines");
     }
 
     @GetMapping("/edit")
     public String editProductLineGet(@RequestParam("productLine") String id , Model model) {
         Productline productline = service.findById(id);
 
-        buildView(model, productline, true);
+        Page<Productline> productlineList = service.findByQuery("",  0, 5);
+
+        model.addAttribute("productlines", productlineList);
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("totalPages", productlineList.getTotalPages());
+        model.addAttribute("pageSize", 5);
+
+        model.addAttribute("productLine", productline);
+        model.addAttribute("editMode", true);
+
         return "productlines/get";
     }
 
     @PostMapping("/edit")
-    public String editProductLinePost(@RequestParam("productLine") String productLine, Productline productline, Model model) {
+    public void editProductLinePost(@RequestParam("productLine") String productLine, Productline productline,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) throws IOException {
         service.updateProductLine(productLine, productline);
 
-        return "redirect:/productlines";
+
+
+        response.sendRedirect("/productlines");
     }
 
     @GetMapping("/delete")

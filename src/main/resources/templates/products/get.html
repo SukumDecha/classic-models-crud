@@ -7,19 +7,18 @@
     <title>Product Line</title>
 </head>
 <body>
-    <div class="flex flex-col items-center justify-center relative w-full">
-        <div th:replace="~{shared/navbar :: search(endPoint='/productlines')}"></div>
+    <div class="flex flex-col items-center justify-center relative w-full overflow-scroll">
+        <div th:replace="~{shared/navbar :: search(endPoint='/products')}"></div>
 
         <div class="w-full h-screen overflow-scroll bg-gradient-to-r from-teal-700 via-cyan-700 to-teal-800 grid place-item-center">
-            <div th:replace="~{productlines/product-list :: productList(productlines=${productlines},
+            <div th:replace="~{products/product-list :: productList(products=${products},
          currentPage=${currentPage},
          totalPages=${totalPages})}">
             </div>
         </div>
 
-
-        <div th:replace="~{productlines/create-btn}"></div>
-        <div th:replace="~{productlines/modal :: modal(productLine=${productLine}, editMode=${editMode})}"></div>
+        <div th:replace="~{products/create-btn}"></div>
+        <div th:replace="~{products/modal :: modal(product=${product}, editMode=${editMode}, productLines=${productLines})}"></div>
     </div>
 </body>
 </html>

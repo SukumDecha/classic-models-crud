@@ -1,32 +1,23 @@
-<div th:fragment="productList(productlines)"
-     class="relative overflow-x-auto shadow-md sm:rounded-lg w-full relative">
+<div th:fragment="productList(productlines, currentPage, totalPages)"
+     class="relative overflow-x-auto shadow-md sm:rounded-lg container p-4 mx-auto">
 
-    <div th:if="${productlines.isEmpty()}">
+    <div th:if="${productlines.empty}">
         <div th:replace="~{shared/not-found}"></div>
     </div>
 
-    <table th:if="${!productlines.isEmpty()}" class="table-auto text-sm text-left text-gray-500 dark:text-gray-400">
+    <table th:if="${!productlines.empty}" class="table-auto text-sm text-left text-gray-500 dark:text-gray-400 w-full">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
-            <th scope="col" class="px-6 py-3">
-                Product line
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Description
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Total Products
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Action
-            </th>
+            <th scope="col" class="px-6 py-3">Product Line</th>
+            <th scope="col" class="px-6 py-3">Description</th>
+            <th scope="col" class="px-6 py-3">Total Products</th>
+            <th scope="col" class="px-6 py-3">Action</th>
         </tr>
         </thead>
-        <tbody th:each="pl : ${productlines}">
-        <tr class="odd:bg-white odd:dark:bg-gray-900 border-b dark:border-gray-700 p-4">
+        <tbody th:each="pl : ${productlines.content}">
+        <tr class="odd:bg-white odd:dark:bg-gray-900 border-b dark:border-gray-700">
             <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                th:text="${pl.productLine}">
-                ></th>
+                th:text="${pl.productLine}"></th>
             <td class="px-6 py-4" th:text="${pl.textDescription}"></td>
             <td class="px-6 py-4" th:text="${pl.products.size()}"></td>
             <td class="px-6 py-4">
@@ -37,5 +28,29 @@
             </td>
         </tr>
         </tbody>
+        <tfoot class="text-xs text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-400">
+        <tr>
+            <td colspan="8" class="px-6 py-3">
+                <div class="flex flex-wrap justify-center items-center gap-2">
+                    <a th:if="${currentPage > 1}"
+                       class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                       th:href="@{'/productlines?page=' + ${currentPage - 1} + '&pageSize=' + ${pageSize}}">
+                        Previous
+                    </a>
+                    <span th:each="i : ${#numbers.sequence(1, totalPages)}"
+                          th:classappend="${i == currentPage} ? 'font-bold text-cyan-600' : 'text-gray-500'"
+                          class="px-3 py-1 rounded hover:text-cyan-600 cursor-pointer">
+                            <a th:href="@{'/productlines?page=' + ${i} + '&pageSize=' + ${pageSize}}"
+                               th:text="${i}"></a>
+                        </span>
+                    <a th:if="${currentPage < totalPages}"
+                       class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                       th:href="@{'/productlines?page=' + ${currentPage + 1} + '&pageSize=' + ${pageSize}}">
+                        Next
+                    </a>
+                </div>
+            </td>
+        </tr>
+        </tfoot>
     </table>
 </div>
